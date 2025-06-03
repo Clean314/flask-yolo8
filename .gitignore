@@ -13,3 +13,6 @@ instance/
 
 # 기타
 *.log
+
+# PyCharm 설정 폴더 전체 무시
+.idea/

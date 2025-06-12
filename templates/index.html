@@ -1,32 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>YOLO 분석</title>
-</head>
-<body>
-    <h1>샘플 이미지/비디오 분석</h1>
+    <head>
+        <meta charset="UTF-8" />
+        <title>YOLO 분석</title>
+    </head>
+    <body>
+        <h1>샘플 이미지/비디오 분석</h1>
 
-    <form method="post">
-        <label for="selected_file">파일 선택:</label>
-        <select name="selected_file" id="selected_file">
-            {% for file in sample_files %}
+        <form method="post">
+            <label for="selected_file">파일 선택:</label>
+            <select name="selected_file" id="selected_file">
+                {% for file in sample_files %}
                 <option value="{{ file }}">{{ file }}</option>
-            {% endfor %}
-        </select>
-        <button type="submit">분석</button>
-    </form>
+                {% endfor %}
+            </select>
+            <button type="submit">분석</button>
+        </form>
 
-    {% if result_path %}
+        {% if result_path %}
         <h2>분석 결과:</h2>
         {% if result_type == 'image' %}
-            <img src="{{ result_path }}" width="600">
+        <img src="{{ result_path }}" width="600" />
         {% elif result_type == 'video' %}
-            <video width="600" controls>
-                <source src="{{ result_path }}" type="video/mp4">
-                브라우저가 video 태그를 지원하지 않습니다.
-            </video>
-        {% endif %}
-    {% endif %}
-</body>
+        <video width="600" controls>
+            <source src="{{ result_path }}" type="video/mp4" />
+            브라우저가 video 태그를 지원하지 않습니다.
+        </video>
+        {% endif %} {% endif %}
+    </body>
 </html>

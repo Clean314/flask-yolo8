@@ -1,0 +1,47 @@
+{% extends "base.html" %} {% block title %}분석 결과{% endblock %} {% block
+content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">분석 결과</h2>
+        {% if videos %}
+        <div class="row">
+            {% for video in videos %}
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            분석 결과 #{{ loop.index }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>원본 비디오</h6>
+                        <video class="w-100 mb-3" controls>
+                            <source
+                                src="{{ url_for('static', filename='uploads/' + video.original) }}"
+                                type="video/mp4"
+                            />
+                            브라우저가 비디오 재생을 지원하지 않습니다.
+                        </video>
+
+                        <h6>분석 결과</h6>
+                        <video class="w-100" controls>
+                            <source
+                                src="{{ url_for('static', filename=video.result.replace('static/', '')) }}"
+                                type="video/mp4"
+                            />
+                            브라우저가 비디오 재생을 지원하지 않습니다.
+                        </video>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            아직 업로드된 비디오가 없습니다.
+            <a href="{{ url_for('index') }}">비디오 업로드</a>를 해주세요.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

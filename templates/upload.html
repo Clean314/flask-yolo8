@@ -1,0 +1,94 @@
+{% extends "base.html" %} {% block title %}영상 업로드{% endblock %} {% block
+content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-center">영상 업로드</h3>
+            </div>
+            <div class="card-body">
+                <form
+                    method="POST"
+                    enctype="multipart/form-data"
+                    id="uploadForm"
+                    action="{{ url_for('index') }}"
+                >
+                    <div class="mb-3">
+                        <label for="fileSelect" class="form-label"
+                            >파일 선택</label
+                        >
+                        <select
+                            class="form-select mb-3"
+                            id="fileSelect"
+                            name="fileSelect"
+                        >
+                            <option value="new">새 파일 업로드</option>
+                            {% if previous_files %} {% for file in
+                            previous_files %}
+                            <option value="{{ file.path }}">
+                                {{ file.name }}
+                            </option>
+                            {% endfor %} {% endif %}
+                        </select>
+                    </div>
+
+                    <div id="newFileUpload" class="mb-3">
+                        <label for="video" class="form-label"
+                            >새 비디오 파일 선택</label
+                        >
+                        <input
+                            type="file"
+                            class="form-control"
+                            id="video"
+                            name="video"
+                            accept="video/*"
+                        />
+                        <div class="form-text">
+                            지원되는 형식: MP4, AVI, MOV
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            업로드 및 분석
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const fileSelect = document.getElementById("fileSelect");
+        const newFileUpload = document.getElementById("newFileUpload");
+        const videoInput = document.getElementById("video");
+        const uploadForm = document.getElementById("uploadForm");
+
+        // 초기 상태 설정
+        updateFileInputVisibility();
+
+        // select 변경 시 파일 입력 표시/숨김
+        fileSelect.addEventListener("change", updateFileInputVisibility);
+
+        function updateFileInputVisibility() {
+            if (fileSelect.value === "new") {
+                newFileUpload.style.display = "block";
+                videoInput.required = true;
+            } else {
+                newFileUpload.style.display = "none";
+                videoInput.required = false;
+            }
+        }
+
+        // 폼 제출 전 유효성 검사
+        uploadForm.addEventListener("submit", function (e) {
+            if (fileSelect.value === "new" && !videoInput.files.length) {
+                e.preventDefault();
+                alert("새 파일을 선택해주세요.");
+            }
+        });
+    });
+</script>
+{% endblock %}

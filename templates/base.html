@@ -16,7 +16,7 @@
     <body>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="{{ url_for('index') }}"
+                <a class="navbar-brand" href="{{ url_for('main.index') }}"
                     >영상 분석 시스템</a
                 >
                 <button
@@ -31,17 +31,17 @@
                     <ul class="navbar-nav ms-auto">
                         {% if session.username %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('index') }}"
+                            <a class="nav-link" href="{{ url_for('main.index') }}"
                                 >업로드</a
                             >
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('results') }}"
+                            <a class="nav-link" href="{{ url_for('main.results') }}"
                                 >결과 확인</a
                             >
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('logout') }}"
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}"
                                 >로그아웃</a
                             >
                         </li>
@@ -49,14 +49,14 @@
                         <li class="nav-item">
                             <a
                                 class="nav-link"
-                                href="{{ url_for('login_get') }}"
+                                href="{{ url_for('auth.login') }}"
                                 >로그인</a
                             >
                         </li>
                         <li class="nav-item">
                             <a
                                 class="nav-link"
-                                href="{{ url_for('register_get') }}"
+                                href="{{ url_for('auth.register') }}"
                                 >회원가입</a
                             >
                         </li>

@@ -1,31 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>YOLO 분석</title>
-    </head>
-    <body>
-        <h1>샘플 이미지/비디오 분석</h1>
+{% extends "base.html" %}
+{% block title %}홈{% endblock %}
+{% block content %}
+<h2>{{ username }}님 환영합니다</h2>
 
-        <form method="post">
-            <label for="selected_file">파일 선택:</label>
-            <select name="selected_file" id="selected_file">
-                {% for file in sample_files %}
-                <option value="{{ file }}">{{ file }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit">분석</button>
-        </form>
+<form method="POST" enctype="multipart/form-data">
+    <label for="fileSelect">파일 선택:</label>
+    <select name="fileSelect" id="fileSelect" class="form-select mb-3">
+        <option value="new">새 파일 업로드</option>
+        {% for file in sample_files %}
+        <option value="{{ file }}">{{ file }}</option>
+        {% endfor %}
+    </select>
 
-        {% if result_path %}
-        <h2>분석 결과:</h2>
-        {% if result_type == 'image' %}
-        <img src="{{ result_path }}" width="600" />
-        {% elif result_type == 'video' %}
-        <video width="600" controls>
-            <source src="{{ result_path }}" type="video/mp4" />
-            브라우저가 video 태그를 지원하지 않습니다.
+    <div id="newFileUpload" class="mb-3">
+        <input type="file" name="video" accept="video/*,image/*" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">분석 시작</button>
+</form>
+
+<hr />
+{% if result_path %}
+    {% if result_type == 'image' %}
+        <h3>분석 결과 (이미지)</h3>
+        <img src="{{ result_path }}" width="400">
+    {% elif result_type == 'video' %}
+        <h3>분석 결과 (비디오)</h3>
+        <video width="400" controls>
+            <source src="{{ result_path }}" type="video/{{ result_ext }}">
+            브라우저에서 영상을 재생할 수 없습니다.
         </video>
-        {% endif %} {% endif %}
-    </body>
-</html>
+    {% endif %}
+{% endif %}
+
+<script>
+    const fileSelect = document.getElementById("fileSelect");
+    const newFileUpload = document.getElementById("newFileUpload");
+
+    function toggleUpload() {
+        if (fileSelect.value === "new") {
+            newFileUpload.style.display = "block";
+        } else {
+            newFileUpload.style.display = "none";
+        }
+    }
+
+    fileSelect.addEventListener("change", toggleUpload);
+    toggleUpload();
+</script>
+{% endblock %}

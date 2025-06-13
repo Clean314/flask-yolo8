@@ -1,2 +1,5 @@
 flask
 ultralytics
+flask-sqlalchemy
+werkzeug
+flask_session

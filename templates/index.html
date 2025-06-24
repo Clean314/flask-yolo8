@@ -24,12 +24,10 @@
     {% if result_type == 'image' %}
         <h3>분석 결과 (이미지)</h3>
         <img src="{{ result_path }}" width="400">
+        <br><a href="{{ result_path }}" class="btn btn-success mt-2" download>이미지 다운로드</a>
     {% elif result_type == 'video' %}
         <h3>분석 결과 (비디오)</h3>
-        <video width="400" controls>
-            <source src="{{ result_path }}" type="video/{{ result_ext }}">
-            브라우저에서 영상을 재생할 수 없습니다.
-        </video>
+        <a href="{{ result_path }}" class="btn btn-success" download>비디오 다운로드</a>
     {% endif %}
 {% endif %}
 

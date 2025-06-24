@@ -3,3 +3,4 @@ ultralytics
 flask-sqlalchemy
 werkzeug
 flask_session
+Flask-Migrate

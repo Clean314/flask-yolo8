@@ -11,7 +11,8 @@ class Result(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False)
     original_filename = db.Column(db.String(200), nullable=False)
-    result_path = db.Column(db.String(200), nullable=False)
-    result_type = db.Column(db.String(20), nullable=False)
-    result_ext = db.Column(db.String(20), nullable=False)
+    result_path = db.Column(db.String(200), nullable=True)  # 처음엔 None
+    result_type = db.Column(db.String(20), nullable=True)
+    result_ext = db.Column(db.String(20), nullable=True)
+    status = db.Column(db.String(20), default='processing')  # 'processing' or 'done'
     timestamp = db.Column(db.DateTime, server_default=db.func.now())

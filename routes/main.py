@@ -16,9 +16,11 @@ def login_required_view(func):
     wrapper.__name__ = func.__name__
     return wrapper
 
+# ✅ 수정됨: 역슬래시 제거 처리 추가
 @main_bp.route("/download/<path:filename>")
 @login_required_view
 def download(filename):
+    filename = filename.replace('\\', '/')  # 웹 URL에서 역슬래시 제거
     return send_from_directory(current_app.config['RESULT_FOLDER'], filename, as_attachment=True)
 
 @main_bp.route("/results/status")
@@ -38,7 +40,8 @@ def results_status():
             'download_url': None
         }
         if r.status == 'done' and r.result_path:
-            filename_only = r.result_path.replace(result_folder + os.sep, '')
+            # ✅ 수정됨: 경로 분리 및 웹 호환 경로로 변경
+            filename_only = os.path.relpath(r.result_path, result_folder).replace(os.sep, '/')
             item['download_url'] = url_for('main.download', filename=filename_only)
         response.append(item)
 
@@ -53,7 +56,7 @@ def results():
 
     for r in results:
         if r.result_path and r.result_path.startswith(result_folder):
-            r.download_filename = r.result_path.replace(result_folder + os.sep, '')
+            r.download_filename = os.path.relpath(r.result_path, result_folder).replace(os.sep, '/')
         else:
             r.download_filename = None
 
@@ -134,7 +137,6 @@ def index():
                 flash("선택한 샘플 파일이 존재하지 않습니다.", "danger")
                 return redirect(url_for('main.index'))
 
-        # DB에 먼저 저장 (status = processing)
         result_record = Result(
             username=username,
             original_filename=filename,
@@ -143,7 +145,6 @@ def index():
         db.session.add(result_record)
         db.session.commit()
 
-        # 백그라운드에서 YOLO 분석 실행
         app_ctx = current_app._get_current_object()
         thread = threading.Thread(
             target=run_yolo_in_background,
@@ -151,7 +152,6 @@ def index():
         )
         thread.start()
 
-        # 결과 페이지로 리디렉션
         return redirect(url_for('main.results'))
 
     return render_template("index.html", sample_files=sample_files, username=username)

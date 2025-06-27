@@ -6,9 +6,15 @@ from utils.file_utils import is_image, is_video
 import os, uuid, threading
 
 main_bp = Blueprint('main', __name__)
+
+# YOLO 모델 초기화
 model = YOLO("yolov8n.pt")
 
 def login_required_view(func):
+    """
+    로그인 여부를 검사하는 데코레이터
+    - 세션에 username 없으면 로그인 페이지로 리다이렉트
+    """
     def wrapper(*args, **kwargs):
         if 'username' not in session:
             return redirect(url_for('auth.login'))
@@ -16,16 +22,23 @@ def login_required_view(func):
     wrapper.__name__ = func.__name__
     return wrapper
 
-# ✅ 수정됨: 역슬래시 제거 처리 추가
 @main_bp.route("/download/<path:filename>")
 @login_required_view
 def download(filename):
-    filename = filename.replace('\\', '/')  # 웹 URL에서 역슬래시 제거
+    """
+    결과 파일 다운로드 라우트
+    - RESULT_FOLDER 내 파일을 첨부로 반환
+    """
+    filename = filename.replace('\\', '/')
     return send_from_directory(current_app.config['RESULT_FOLDER'], filename, as_attachment=True)
 
 @main_bp.route("/results/status")
 @login_required_view
 def results_status():
+    """
+    로그인 사용자의 처리 결과 상태를 JSON으로 반환
+    - Ajax polling 용도
+    """
     username = session.get("username")
     result_folder = current_app.config['RESULT_FOLDER']
     results = Result.query.filter_by(username=username).order_by(Result.timestamp.desc()).all()
@@ -40,7 +53,6 @@ def results_status():
             'download_url': None
         }
         if r.status == 'done' and r.result_path:
-            # ✅ 수정됨: 경로 분리 및 웹 호환 경로로 변경
             filename_only = os.path.relpath(r.result_path, result_folder).replace(os.sep, '/')
             item['download_url'] = url_for('main.download', filename=filename_only)
         response.append(item)
@@ -50,6 +62,10 @@ def results_status():
 @main_bp.route("/results")
 @login_required_view
 def results():
+    """
+    로그인 사용자의 처리 결과 목록 렌더링
+    - HTML 템플릿
+    """
     username = session.get("username")
     results = Result.query.filter_by(username=username).order_by(Result.timestamp.desc()).all()
     result_folder = current_app.config['RESULT_FOLDER']
@@ -63,6 +79,12 @@ def results():
     return render_template("results.html", videos=results, username=username, result_folder=result_folder)
 
 def run_yolo_in_background(app: Flask, result_record_id, input_path, filename, ext):
+    """
+    YOLO 모델을 백그라운드에서 실행하는 함수
+    - 이미지/비디오 판별
+    - 예측 결과 생성 및 저장
+    - 처리 상태 DB 갱신
+    """
     with app.app_context():
         result_record = Result.query.get(result_record_id)
         try:
@@ -105,6 +127,11 @@ def run_yolo_in_background(app: Flask, result_record_id, input_path, filename, e
 @main_bp.route("/", methods=["GET", "POST"])
 @login_required_view
 def index():
+    """
+    메인 화면 라우트
+    - GET: 업로드/샘플 선택 화면
+    - POST: 업로드 or 샘플 선택 → YOLO 처리 스레드 시작
+    """
     username = session.get("username")
     sample_files = os.listdir(current_app.config['SAMPLE_FOLDER'])
 
@@ -112,6 +139,7 @@ def index():
         file_select = request.form.get("fileSelect")
 
         if file_select == "new":
+            # 사용자가 새 파일 업로드
             uploaded_file = request.files.get("video")
             if not uploaded_file or uploaded_file.filename == "":
                 flash("파일이 선택되지 않았습니다.", "danger")
@@ -129,6 +157,7 @@ def index():
             input_path = save_path
 
         else:
+            # 샘플 파일 선택
             filename = file_select
             ext = filename.rsplit('.', 1)[1].lower()
             input_path = os.path.join(current_app.config['SAMPLE_FOLDER'], file_select)
@@ -137,6 +166,7 @@ def index():
                 flash("선택한 샘플 파일이 존재하지 않습니다.", "danger")
                 return redirect(url_for('main.index'))
 
+        # 처리 기록 DB에 저장
         result_record = Result(
             username=username,
             original_filename=filename,
@@ -145,6 +175,7 @@ def index():
         db.session.add(result_record)
         db.session.commit()
 
+        # YOLO 처리 스레드 시작
         app_ctx = current_app._get_current_object()
         thread = threading.Thread(
             target=run_yolo_in_background,

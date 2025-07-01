@@ -1,84 +1,92 @@
-{% extends "base.html" %}
-{% block title %}결과 이력{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% block title %}결과 이력{% endblock %} {% block
+content %}
+<!--
+    [results.html]
+    - 분석 결과 이력 페이지 템플릿입니다.
+    - username 변수를 사용합니다.
+    - Ajax로 5초마다 결과 상태를 갱신합니다.
+-->
 <h3>{{ username }}님의 분석 결과 이력</h3>
 
+<!-- 분석 결과 테이블 -->
 <table class="table text-center">
-  <thead class="table-dark">
-    <tr>
-      <th>파일명</th>
-      <th>타입</th>
-      <th>상태</th>
-      <th>다운로드</th>
-    </tr>
-  </thead>
-  <tbody id="results-body">
-    <!-- JS에서 채워짐 -->
-  </tbody>
+    <thead class="table-dark">
+        <tr>
+            <th>파일명</th>
+            <th>타입</th>
+            <th>상태</th>
+            <th>다운로드</th>
+        </tr>
+    </thead>
+    <tbody id="results-body">
+        <!-- JavaScript에서 동적으로 결과를 채움 -->
+    </tbody>
 </table>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    function fetchStatusAndUpdate() {
-        fetch("{{ url_for('main.results_status') }}")
-            .then(response => response.json())
-            .then(data => {
-                const tbody = document.getElementById("results-body");
-                tbody.innerHTML = "";  // 기존 내용 초기화
+    document.addEventListener("DOMContentLoaded", function () {
+        // Ajax로 5초마다 결과 상태를 갱신
+        function fetchStatusAndUpdate() {
+            fetch("{{ url_for('main.results_status') }}")
+                .then((response) => response.json())
+                .then((data) => {
+                    const tbody = document.getElementById("results-body");
+                    tbody.innerHTML = ""; // 기존 내용 초기화
 
-                data.forEach(item => {
-                    const row = document.createElement("tr");
+                    data.forEach((item) => {
+                        const row = document.createElement("tr");
 
-                    // 파일명
-                    const nameCell = document.createElement("td");
-                    nameCell.textContent = item.filename;
-                    row.appendChild(nameCell);
+                        // 파일명
+                        const nameCell = document.createElement("td");
+                        nameCell.textContent = item.filename;
+                        row.appendChild(nameCell);
 
-                    // 타입
-                    const typeCell = document.createElement("td");
-                    typeCell.textContent = item.result_type || "-";
-                    row.appendChild(typeCell);
+                        // 타입
+                        const typeCell = document.createElement("td");
+                        typeCell.textContent = item.result_type || "-";
+                        row.appendChild(typeCell);
 
-                    // 상태
-                    const statusCell = document.createElement("td");
-                    if (item.status === "done") {
-                        statusCell.innerHTML = "완료";
-                    } else if (item.status === "error") {
-                        statusCell.innerHTML = '<span class="text-danger">실패</span>';
-                    } else {
-                        statusCell.innerHTML = `
+                        // 상태
+                        const statusCell = document.createElement("td");
+                        if (item.status === "done") {
+                            statusCell.innerHTML = "완료";
+                        } else if (item.status === "error") {
+                            statusCell.innerHTML =
+                                '<span class="text-danger">실패</span>';
+                        } else {
+                            statusCell.innerHTML = `
                           <div class="progress" style="height: 20px;">
                             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
                                  style="width: 100%;">진행 중</div>
                           </div>
                         `;
-                    }
-                    row.appendChild(statusCell);
+                        }
+                        row.appendChild(statusCell);
 
-                    // 다운로드
-                    const dlCell = document.createElement("td");
-                    if (item.status === "done" && item.download_url) {
-                        const link = document.createElement("a");
-                        link.href = item.download_url;
-                        link.className = "btn btn-success btn-sm";
-                        link.textContent = "다운로드";
-                        dlCell.appendChild(link);
-                    } else {
-                        const btn = document.createElement("button");
-                        btn.className = "btn btn-secondary btn-sm";
-                        btn.disabled = true;
-                        btn.textContent = "대기중";
-                        dlCell.appendChild(btn);
-                    }
-                    row.appendChild(dlCell);
+                        // 다운로드
+                        const dlCell = document.createElement("td");
+                        if (item.status === "done" && item.download_url) {
+                            const link = document.createElement("a");
+                            link.href = item.download_url;
+                            link.className = "btn btn-success btn-sm";
+                            link.textContent = "다운로드";
+                            dlCell.appendChild(link);
+                        } else {
+                            const btn = document.createElement("button");
+                            btn.className = "btn btn-secondary btn-sm";
+                            btn.disabled = true;
+                            btn.textContent = "대기중";
+                            dlCell.appendChild(btn);
+                        }
+                        row.appendChild(dlCell);
 
-                    tbody.appendChild(row);
+                        tbody.appendChild(row);
+                    });
                 });
-            });
-    }
+        }
 
-    fetchStatusAndUpdate();               // 최초 1회
-    setInterval(fetchStatusAndUpdate, 5000);  // 5초마다 갱신
-});
+        fetchStatusAndUpdate(); // 최초 1회 실행
+        setInterval(fetchStatusAndUpdate, 5000); // 5초마다 갱신
+    });
 </script>
 {% endblock %}

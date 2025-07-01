@@ -5,7 +5,13 @@
 __pycache__/
 *.pyc
 
-static/results/
+# Flask 세션 파일
+flask_session/
+
+# static/results 폴더 내 .gitkeep만 추적, 나머지는 무시
+# 폴더 자체가 제외될 경우, 결과 파일이 저장되지 않음
+static/results/*
+!static/results/.gitkeep
 
 # Flask 실행 관련
 instance/

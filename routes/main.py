@@ -4,6 +4,7 @@ from ultralytics import YOLO
 from models import db, Result
 from utils.file_utils import is_image, is_video
 import os, uuid, threading
+import re
 
 main_bp = Blueprint('main', __name__)
 
@@ -147,6 +148,13 @@ def index():
 
             filename = secure_filename(uploaded_file.filename)
             ext = filename.rsplit('.', 1)[1].lower()
+
+            # 파일명에 한글, 공백, 특수문자 포함 여부 검사
+            # 영문, 숫자, 점(.), 하이픈(-), 언더바(_)만 허용
+            # 정규표현식: 한글, 공백, 기타 특수문자 포함 시 업로드 거부
+            if re.search(r'[^A-Za-z0-9._-]', uploaded_file.filename):
+                flash("파일명에는 영문, 숫자, 점(.), 하이픈(-), 언더바(_)만 사용할 수 있습니다.", "danger")
+                return redirect(url_for('main.index'))
 
             if not (is_image(filename) or is_video(filename)):
                 flash("지원하지 않는 파일 형식입니다.", "danger")
